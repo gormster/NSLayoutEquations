@@ -8,14 +8,17 @@
 #
 Pod::Spec.new do |s|
   s.name         = "NSLayoutEquations"
-  s.version      = "0.0.1"
-  s.summary      = "Seriously: it's just y=mx+b. So why does the average NSLayoutConstraint take 200-odd characters to initialise? Adds two new methods: +[NSLayoutConstraint constraintWithFormula:LHS:RHS:] and -[UIView constrain:to:]. Make auto layout as simple as a sentence."
-  # s.description  = <<-DESC
-  #                   An optional longer description of NSLayoutEquations
-  #
-  #                   * Markdown format.
-  #                   * Don't worry about the indent, we strip it!
-  #                  DESC
+  s.version      = "0.1"
+  s.summary      = "Make NSLayoutConstraint as easy as y = mx + b"
+  s.description  = <<-DESC
+                    Seriously: it's just y=mx+b. So why does the average NSLayoutConstraint take 200-odd characters to initialise?
+                    
+                    Adds two new methods:
+                    * +[NSLayoutConstraint constraintWithFormula:LHS:RHS:]
+                    * -[UIView constrain:to:]
+                    
+                    Make auto layout as simple as a sentence.
+                   DESC
   s.homepage     = "https://github.com/gormster/NSLayoutEquations"
 
   # Specify the license type. CocoaPods detects automatically the license file if it is named

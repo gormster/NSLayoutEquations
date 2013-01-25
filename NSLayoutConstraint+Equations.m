@@ -129,8 +129,6 @@
     //Now we've got the closest common ancestor, we just make the constraint and add it
     NSLayoutConstraint* constraint = [NSLayoutConstraint constraintWithFormula:formula LHS:self RHS:otherView];
     [commonSuperview addConstraint:constraint];
-
-    [NSLayoutConstraint constraintWithItem:someView attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationGreaterThanOrEqual toItem:someOtherView attribute:NSLayoutAttributeWidth multiplier:1.0 constant:0.0];
     
 }
 
