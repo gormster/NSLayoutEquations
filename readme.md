@@ -49,7 +49,7 @@ Or, if I really wanted to save time, I could write:
 
     [aView constrain:@"width = width" to:anotherView]
 
-This has a slightly higher performance penalty, as the common superview must be determined by code - but it's an extremely minimal penalty, especially if the view hierarchy is simple.
+This has a slight performance penalty, as the common superview must be determined by code - but it's an extremely minimal penalty, especially if the view hierarchy is simple.
 
 Something a bit more complicated: I have two side-by-side views and want to make sure the view on the right is always twice the width of the view on the left, and is always separated by ten points of space. Let's set up *all* the required constraints, even though you'd usually use the visual format for most of it. Our three views are called `leftView`, `rightView` and `superview`.
 
