@@ -92,6 +92,7 @@
 {
     if ([self isEqual:otherView]) {
         //can't constrain a view to itself
+        //TODO: do this properly
         @throw [NSError errorWithDomain:@"Layout" code:-1 userInfo:nil];
     }
     
@@ -121,6 +122,7 @@
     
     if (commonSuperview == nil) {
         //no common superview
+        //TODO: do this properly
         @throw [NSError errorWithDomain:@"Layout" code:-2 userInfo:nil];
     }
     
