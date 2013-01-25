@@ -23,8 +23,7 @@
     static NSDictionary* relationDict;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        //NSString* pattern = @"([a-zA-Z_][a-zA-Z0-9_]*)\\s*(=|<|>)\\s*(?:(\\d+(?:\\.\\d+)?)\\s*\\*)?\\s*([a-zA-Z_][a-zA-Z0-9_]+)\\s*(?:\\+\\s*(\\d+(?:\\.\\d+)?))?";
-        NSString* pattern = @"([a-zA-Z_][a-zA-Z0-9_]*)\\s*(=|<|>)\\s*([a-zA-Z_][a-zA-Z0-9_]+)";
+        NSString* pattern = @"([a-zA-Z_][a-zA-Z0-9_]*)\\s*(=|<|>)\\s*(?:(\\d+(?:\\.\\d+)?)\\s*\\*)?\\s*([a-zA-Z_][a-zA-Z0-9_]+)\\s*(?:\\+\\s*(\\d+(?:\\.\\d+)?))?";
         NSError* err;
         expr = [NSRegularExpression regularExpressionWithPattern:pattern options:0 error:&err];
         if (expr == nil) {
@@ -59,34 +58,21 @@
     lhsPropertyString = [formula substringWithRange:[rslt rangeAtIndex:1]];
     relationString = [formula substringWithRange:[rslt rangeAtIndex:2]];
     
-    NSLog(@"num ranges %i",[rslt numberOfRanges]);
+    if ([rslt rangeAtIndex:3].length > 0) {
+        multiplier = [[formula substringWithRange:[rslt rangeAtIndex:3]] floatValue];
+    }
     
-    //gets complicated
-    NSString* thirdGroup = [formula substringWithRange:[rslt rangeAtIndex:3]];
-    if ([thirdGroup floatValue] == 0.0) {
-        rhsPropertyString = thirdGroup;
-        if ([rslt numberOfRanges] == 5) {
-            constant = [[formula substringWithRange:[rslt rangeAtIndex:4]] floatValue];
-        }
-    } else {
-        multiplier = [thirdGroup floatValue];
-        rhsPropertyString = [formula substringWithRange:[rslt rangeAtIndex:4]];
-        if ([rslt numberOfRanges] == 6) {
-            constant = [[formula substringWithRange:[rslt rangeAtIndex:5]] floatValue];
-        }
+    rhsPropertyString = [formula substringWithRange:[rslt rangeAtIndex:4]];
+    
+    if ([rslt rangeAtIndex:5].length > 0) {
+        constant = [[formula substringWithRange:[rslt rangeAtIndex:5]] floatValue];
     }
     
     //translate property strings to properties
-    
-    NSLog(@"%@  = %@",lhsPropertyString,rhsPropertyString);
-    
     NSLayoutAttribute lhsAttribute = [layoutDict[lhsPropertyString] integerValue];
     NSLayoutAttribute rhsAttribute = [layoutDict[rhsPropertyString] integerValue];
     
     NSLayoutRelation relation = [relationDict[relationString] integerValue];
-    
-    NSLog(@"%i",NSLayoutAttributeWidth);
-    NSLog(@"%i = %i",lhsAttribute,rhsAttribute);
     
     return [self constraintWithItem:lhs
                           attribute:lhsAttribute
