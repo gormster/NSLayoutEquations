@@ -106,19 +106,21 @@
     
     UIView* v1 = self, *v2 = otherView;
     UIView* commonSuperview = nil;
-    
-    while ((v1.superview != nil) && (v2.superview != nil)) {
+
+    do {
         v1 = v1.superview;
         v2 = v2.superview;
-        [s1 addObject:v1];
-        [s2 addObject:v2];
-        
+        if (v1)
+            [s1 addObject:v1];
+        if (v2)
+            [s2 addObject:v2];
+
         if ([s1 intersectsSet:s2]) {
             [s1 intersectSet:s2];
             commonSuperview = [s1 anyObject];
             break;
         }
-    }
+    } while (v1 && v2);
     
     if (commonSuperview == nil) {
         //no common superview
