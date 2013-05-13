@@ -111,7 +111,6 @@
                              multiplier:multiplier
                                constant:constant];
     }
-    
 }
 
 @end
@@ -120,46 +119,44 @@
 
 -(void) constrain:(NSString *)formula to:(UIView *)otherView
 {
-    if ([self isEqual:otherView]) {
-        //can't constrain a view to itself
-        //TODO: do this properly
-        @throw [NSError errorWithDomain:@"Layout" code:-1 userInfo:nil];
-    }
-    
-    // The first thing we do is find the closest common ancestor.
-    // We do this by adding all the ancestors, one by one, to two sets
-    // As soon as they have a common object, we've got the closest
-    // common ancestor.
-    NSMutableSet * s1, * s2;
-    s1 = [NSMutableSet setWithObject:self];
-    s2 = [NSMutableSet setWithObject:otherView];
-    
-    UIView* v1 = self, *v2 = otherView;
+    NSAssert([self isEqual:otherView] == NO, @"can't constrain a view to itself");
+
     UIView* commonSuperview = nil;
-    
-    while ((v1.superview != nil) && (v2.superview != nil)) {
-        v1 = v1.superview;
-        v2 = v2.superview;
-        [s1 addObject:v1];
-        [s2 addObject:v2];
+
+    if (otherView != nil) {
+        // The first thing we do is find the closest common ancestor.
+        // We do this by adding all the ancestors, one by one, to two sets
+        // As soon as they have a common object, we've got the closest
+        // common ancestor.
+        NSMutableSet * s1, * s2;
+        s1 = [NSMutableSet setWithObject:self];
+        s2 = [NSMutableSet setWithObject:otherView];
         
-        if ([s1 intersectsSet:s2]) {
-            [s1 intersectSet:s2];
-            commonSuperview = [s1 anyObject];
-            break;
-        }
+        UIView* v1 = self, *v2 = otherView;
+
+        do {
+            v1 = v1.superview;
+            v2 = v2.superview;
+            if (v1)
+                [s1 addObject:v1];
+            if (v2)
+                [s2 addObject:v2];
+
+            if ([s1 intersectsSet:s2]) {
+                [s1 intersectSet:s2];
+                commonSuperview = [s1 anyObject];
+                break;
+            }
+        } while (v1 && v2);
+        
+        NSAssert(commonSuperview != nil, @"no common superview");
+    } else {
+        commonSuperview = self.superview;
     }
-    
-    if (commonSuperview == nil) {
-        //no common superview
-        //TODO: do this properly
-        @throw [NSError errorWithDomain:@"Layout" code:-2 userInfo:nil];
-    }
-    
+        
     //Now we've got the closest common ancestor, we just make the constraint and add it
     NSLayoutConstraint* constraint = [NSLayoutConstraint constraintWithFormula:formula LHS:self RHS:otherView];
     [commonSuperview addConstraint:constraint];
-    
 }
 
 @end
