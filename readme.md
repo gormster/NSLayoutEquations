@@ -15,13 +15,19 @@ The format is:
     
 With the forumla you supply references to the two views being constrainted as `LHS` and `RHS` (being left-hand and right-hand side respectively). The `attribute`s in the formula correspond to attribtues on these views.
 
+There is a second format for simple constant constraints. It is:
+
+    formula = <attribute> ( "=" | "<" | ">" ) <constant>
+
+This format is invoked if RHS == nil.
+
 ## The methods
 
 ###  +[NSLayoutConstraint constraintWithFormula:LHS:RHS:]
 
 **Signature** : `+ (NSLayoutConstraint*) constraintWithFormula:(NSString *)formula LHS:(id)lhs RHS:(id)rhs`
 
-This generates a layout constraint with the formula used, referencing the two views passed in. Simple enough.
+This generates a layout constraint with the formula used, referencing the two views passed in. Simple enough. Pass in nil for `rhs` if you're making a constant constraint.
 
 ###  -[UIView constrain:to:]
 
