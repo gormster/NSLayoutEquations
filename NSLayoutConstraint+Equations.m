@@ -29,6 +29,15 @@
     static NSDictionary* layoutDict;
     static NSDictionary* relationDict;
     static dispatch_once_t onceToken;
+
+    static int indexLHS = 1;
+    static int indexRelation = 2;
+    static int indexMultiplier = 3;
+    static int indexConstant_noRHS = 3; // Used to index unary view expressions
+    static int indexRHS = 4;
+    static int indexOp = 5;
+    static int indexConstant = 6;
+
     dispatch_once(&onceToken, ^{
         NSString* pattern = @"(" PROPERTY ")" WHITESPACE "(" RELATION ")" WHITESPACE "(?:(" NUMBER ")" WHITESPACE "\\*)?" WHITESPACE "(" PROPERTY ")" WHITESPACE "(?:([\\+-])" WHITESPACE "(" NUMBER "))?";
         NSError* err;
@@ -70,9 +79,9 @@
     if (rhs == nil) {
         NSTextCheckingResult* rslt = [constExpr firstMatchInString:formula options:0 range:NSMakeRange(0, formula.length)];
 
-        lhsPropertyString = [formula substringWithRange:[rslt rangeAtIndex:1]];
-        relationString = [formula substringWithRange:[rslt rangeAtIndex:2]];
-        constant = [[formula substringWithRange:[rslt rangeAtIndex:3]] floatValue];
+        lhsPropertyString = [formula substringWithRange:[rslt rangeAtIndex:indexLHS]];
+        relationString = [formula substringWithRange:[rslt rangeAtIndex:indexRelation]];
+        constant = [[formula substringWithRange:[rslt rangeAtIndex:indexConstant_noRHS]] floatValue];
 
         NSLayoutAttribute lhsAttribute = [layoutDict[lhsPropertyString] integerValue];
         NSLayoutRelation relation = [relationDict[relationString] integerValue];
@@ -89,18 +98,18 @@
         NSTextCheckingResult* rslt = [expr firstMatchInString:formula options:0 range:NSMakeRange(0, formula.length)];
 
         //assign our strings
-        lhsPropertyString = [formula substringWithRange:[rslt rangeAtIndex:1]];
-        relationString = [formula substringWithRange:[rslt rangeAtIndex:2]];
+        lhsPropertyString = [formula substringWithRange:[rslt rangeAtIndex:indexLHS]];
+        relationString = [formula substringWithRange:[rslt rangeAtIndex:indexRelation]];
 
-        if ([rslt rangeAtIndex:3].length > 0) {
-            multiplier = [[formula substringWithRange:[rslt rangeAtIndex:3]] floatValue];
+        if ([rslt rangeAtIndex:indexMultiplier].length > 0) {
+            multiplier = [[formula substringWithRange:[rslt rangeAtIndex:indexMultiplier]] floatValue];
         }
 
-        rhsPropertyString = [formula substringWithRange:[rslt rangeAtIndex:4]];
+        rhsPropertyString = [formula substringWithRange:[rslt rangeAtIndex:indexRHS]];
 
-        if ([rslt rangeAtIndex:5].length > 0) {
-            NSString *op = [formula substringWithRange:[rslt rangeAtIndex:5]];
-            constant = [[formula substringWithRange:[rslt rangeAtIndex:6]] floatValue];
+        if ([rslt rangeAtIndex:indexConstant].length > 0) {
+            NSString *op = [formula substringWithRange:[rslt rangeAtIndex:indexOp]];
+            constant = [[formula substringWithRange:[rslt rangeAtIndex:indexConstant]] floatValue];
 
             if ([op isEqual:@"-"]) {
                 constant *= -1;
