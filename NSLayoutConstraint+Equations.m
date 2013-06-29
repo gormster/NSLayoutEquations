@@ -136,6 +136,13 @@
 
 @implementation UIView (Equations)
 
+- (NSLayoutConstraint *)buildConstraint:(NSString *)formula with:(UIView *)otherView
+{
+    // Build constraints a bit more naturally
+
+    return [NSLayoutConstraint constraintWithFormula:formula LHS:self RHS:otherView];
+}
+
 - (NSLayoutConstraint *)constrain:(NSString *)formula to:(UIView *)otherView
 {
     NSAssert([self isEqual:otherView] == NO, @"can't constrain a view to itself");
@@ -174,7 +181,7 @@
     }
 
     //Now we've got the closest common ancestor, we just make the constraint and add it
-    NSLayoutConstraint* constraint = [NSLayoutConstraint constraintWithFormula:formula LHS:self RHS:otherView];
+    NSLayoutConstraint* constraint = [self buildConstraint:formula with:otherView];
     [commonSuperview addConstraint:constraint];
     return constraint;
 }
