@@ -8,6 +8,11 @@
 
 #import "NSLayoutConstraint+Equations.h"
 
+#define PROPERTY "[a-zA-Z_][a-zA-Z0-9_]*"
+#define WHITESPACE "\\s*"
+#define RELATION "=|<|>"
+#define NUMBER "\\d+(?:\\.\\d+)?"
+
 @implementation NSLayoutConstraint (Equations)
 
 + (NSLayoutConstraint*) constraintWithFormula:(NSString *)formula LHS:(id)lhs RHS:(id)rhs
@@ -25,7 +30,7 @@
     static NSDictionary* relationDict;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        NSString* pattern = @"([a-zA-Z_][a-zA-Z0-9_]*)\\s*(=|<|>)\\s*(?:(\\d+(?:\\.\\d+)?)\\s*\\*)?\\s*([a-zA-Z_][a-zA-Z0-9_]+)\\s*(?:([\\+-])\\s*(\\d+(?:\\.\\d+)?))?";
+        NSString* pattern = @"(" PROPERTY ")" WHITESPACE "(" RELATION ")" WHITESPACE "(?:(" NUMBER ")" WHITESPACE "\\*)?" WHITESPACE "(" PROPERTY ")" WHITESPACE "(?:([\\+-])" WHITESPACE "(" NUMBER "))?";
         NSError* err;
         expr = [NSRegularExpression regularExpressionWithPattern:pattern options:0 error:&err];
         if (expr == nil) {
@@ -33,7 +38,7 @@
             abort();
         }
 
-        pattern = @"([a-zA-Z_][a-zA-Z0-9_]*)\\s*(=|<|>)\\s*(\\d+(?:\\.\\d+)?)";
+        pattern = @"(" PROPERTY ")" WHITESPACE "(" RELATION ")" WHITESPACE "(" NUMBER ")";
         constExpr = [NSRegularExpression regularExpressionWithPattern:pattern options:0 error:&err];
         if (constExpr == nil) {
             NSLog(@"%@",err);
