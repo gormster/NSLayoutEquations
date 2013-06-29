@@ -13,7 +13,7 @@
 + (NSLayoutConstraint*) constraintWithFormula:(NSString *)formula LHS:(id)lhs RHS:(id)rhs
 {
     //parse the formula
-    //the format is property { = | < | > } [multiplier *] property [+ constant]
+    //the format is property { = | < | > } [multiplier *] property [{ + | - } constant]
     //or if RHS is nil property { = | < | > } constant
 
     NSString *lhsPropertyString, *rhsPropertyString, *relationString;
@@ -94,13 +94,12 @@
         rhsPropertyString = [formula substringWithRange:[rslt rangeAtIndex:4]];
 
         if ([rslt rangeAtIndex:5].length > 0) {
-            NSRange constRange = [rslt rangeAtIndex:6];
-            NSAssert(constRange.length, @"constant missing");
-            constant = [[formula substringWithRange:constRange] floatValue];
-
             NSString *op = [formula substringWithRange:[rslt rangeAtIndex:5]];
-            if ([op isEqual:@"-"])
+            constant = [[formula substringWithRange:[rslt rangeAtIndex:6]] floatValue];
+
+            if ([op isEqual:@"-"]) {
                 constant *= -1;
+            }
         }
 
         //translate property strings to properties
