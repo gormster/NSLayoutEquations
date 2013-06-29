@@ -16,7 +16,8 @@
 
 @interface UIView (Equations)
 
-- (NSLayoutConstraint *)buildConstraint:(NSString *)formula with:(UIView *)otherView;
 - (NSLayoutConstraint *)constrain:(NSString*)formula to:(UIView*)otherView;
+- (NSLayoutConstraint *)buildConstraint:(NSString *)formula with:(UIView *)otherView;
+- (NSLayoutConstraint *)buildConstraint:(NSString *)formula with:(UIView *)otherView priority:(UILayoutPriority)priority;
 
 @end

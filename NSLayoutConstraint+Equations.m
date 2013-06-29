@@ -136,11 +136,18 @@
 
 @implementation UIView (Equations)
 
+- (NSLayoutConstraint *)buildConstraint:(NSString *)formula with:(UIView *)otherView priority:(UILayoutPriority)priority
+{
+    NSLayoutConstraint *constraint = [NSLayoutConstraint constraintWithFormula:formula LHS:self RHS:otherView];
+    constraint.priority = priority;
+    return constraint;
+}
+
 - (NSLayoutConstraint *)buildConstraint:(NSString *)formula with:(UIView *)otherView
 {
     // Build constraints a bit more naturally
 
-    return [NSLayoutConstraint constraintWithFormula:formula LHS:self RHS:otherView];
+    return [self buildConstraint:formula with:otherView priority:UILayoutPriorityRequired];
 }
 
 - (NSLayoutConstraint *)constrain:(NSString *)formula to:(UIView *)otherView
