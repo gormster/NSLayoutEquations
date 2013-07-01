@@ -10,12 +10,12 @@
 
 @interface NSLayoutConstraint (Equations)
 
-+ (NSLayoutConstraint*) constraintWithFormula:(NSString*)formula LHS:(id)lhs RHS:(id)rhs;
++ (NSLayoutConstraint *)constraintWithFormula:(NSString*)formula LHS:(id)lhs RHS:(id)rhs;
 
 @end
 
 @interface UIView (Equations)
 
-- (void) constrain:(NSString*)formula to:(UIView*)otherView;
+- (NSLayoutConstraint *)constrain:(NSString*)formula to:(UIView*)otherView;
 
 @end
