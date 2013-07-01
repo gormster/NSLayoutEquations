@@ -8,12 +8,17 @@
 
 #import "NSLayoutConstraint+Equations.h"
 
+#define PROPERTY "[a-zA-Z_][a-zA-Z0-9_]*"
+#define WHITESPACE "\\s*"
+#define RELATION "=|<|>"
+#define NUMBER "\\d+(?:\\.\\d+)?"
+
 @implementation NSLayoutConstraint (Equations)
 
 + (NSLayoutConstraint*) constraintWithFormula:(NSString *)formula LHS:(id)lhs RHS:(id)rhs
 {
     //parse the formula
-    //the format is property { = | < | > } [multiplier *] property [+ constant]
+    //the format is property { = | < | > } [multiplier *] property [{ + | - } constant]
     //or if RHS is nil property { = | < | > } constant
 
     NSString *lhsPropertyString, *rhsPropertyString, *relationString;
@@ -24,8 +29,17 @@
     static NSDictionary* layoutDict;
     static NSDictionary* relationDict;
     static dispatch_once_t onceToken;
+
+    static int indexLHS = 1;
+    static int indexRelation = 2;
+    static int indexMultiplier = 3;
+    static int indexConstant_noRHS = 3; // Used to index unary view expressions
+    static int indexRHS = 4;
+    static int indexOp = 5;
+    static int indexConstant = 6;
+
     dispatch_once(&onceToken, ^{
-        NSString* pattern = @"([a-zA-Z_][a-zA-Z0-9_]*)\\s*(=|<|>)\\s*(?:(\\d+(?:\\.\\d+)?)\\s*\\*)?\\s*([a-zA-Z_][a-zA-Z0-9_]+)\\s*(?:([\\+-])\\s*(\\d+(?:\\.\\d+)?))?";
+        NSString* pattern = @"(" PROPERTY ")" WHITESPACE "(" RELATION ")" WHITESPACE "(?:(" NUMBER ")" WHITESPACE "\\*)?" WHITESPACE "(" PROPERTY ")" WHITESPACE "(?:([\\+-])" WHITESPACE "(" NUMBER "))?";
         NSError* err;
         expr = [NSRegularExpression regularExpressionWithPattern:pattern options:0 error:&err];
         if (expr == nil) {
@@ -33,7 +47,7 @@
             abort();
         }
 
-        pattern = @"([a-zA-Z_][a-zA-Z0-9_]*)\\s*(=|<|>)\\s*(\\d+(?:\\.\\d+)?)";
+        pattern = @"(" PROPERTY ")" WHITESPACE "(" RELATION ")" WHITESPACE "(" NUMBER ")";
         constExpr = [NSRegularExpression regularExpressionWithPattern:pattern options:0 error:&err];
         if (constExpr == nil) {
             NSLog(@"%@",err);
@@ -65,9 +79,9 @@
     if (rhs == nil) {
         NSTextCheckingResult* rslt = [constExpr firstMatchInString:formula options:0 range:NSMakeRange(0, formula.length)];
 
-        lhsPropertyString = [formula substringWithRange:[rslt rangeAtIndex:1]];
-        relationString = [formula substringWithRange:[rslt rangeAtIndex:2]];
-        constant = [[formula substringWithRange:[rslt rangeAtIndex:3]] floatValue];
+        lhsPropertyString = [formula substringWithRange:[rslt rangeAtIndex:indexLHS]];
+        relationString = [formula substringWithRange:[rslt rangeAtIndex:indexRelation]];
+        constant = [[formula substringWithRange:[rslt rangeAtIndex:indexConstant_noRHS]] floatValue];
 
         NSLayoutAttribute lhsAttribute = [layoutDict[lhsPropertyString] integerValue];
         NSLayoutRelation relation = [relationDict[relationString] integerValue];
@@ -84,23 +98,22 @@
         NSTextCheckingResult* rslt = [expr firstMatchInString:formula options:0 range:NSMakeRange(0, formula.length)];
 
         //assign our strings
-        lhsPropertyString = [formula substringWithRange:[rslt rangeAtIndex:1]];
-        relationString = [formula substringWithRange:[rslt rangeAtIndex:2]];
+        lhsPropertyString = [formula substringWithRange:[rslt rangeAtIndex:indexLHS]];
+        relationString = [formula substringWithRange:[rslt rangeAtIndex:indexRelation]];
 
-        if ([rslt rangeAtIndex:3].length > 0) {
-            multiplier = [[formula substringWithRange:[rslt rangeAtIndex:3]] floatValue];
+        if ([rslt rangeAtIndex:indexMultiplier].length > 0) {
+            multiplier = [[formula substringWithRange:[rslt rangeAtIndex:indexMultiplier]] floatValue];
         }
 
-        rhsPropertyString = [formula substringWithRange:[rslt rangeAtIndex:4]];
+        rhsPropertyString = [formula substringWithRange:[rslt rangeAtIndex:indexRHS]];
 
-        if ([rslt rangeAtIndex:5].length > 0) {
-            NSRange constRange = [rslt rangeAtIndex:6];
-            NSAssert(constRange.length, @"constant missing");
-            constant = [[formula substringWithRange:constRange] floatValue];
+        if ([rslt rangeAtIndex:indexConstant].length > 0) {
+            NSString *op = [formula substringWithRange:[rslt rangeAtIndex:indexOp]];
+            constant = [[formula substringWithRange:[rslt rangeAtIndex:indexConstant]] floatValue];
 
-            NSString *op = [formula substringWithRange:[rslt rangeAtIndex:5]];
-            if ([op isEqual:@"-"])
+            if ([op isEqual:@"-"]) {
                 constant *= -1;
+            }
         }
 
         //translate property strings to properties
@@ -122,6 +135,20 @@
 @end
 
 @implementation UIView (Equations)
+
+- (NSLayoutConstraint *)buildConstraint:(NSString *)formula with:(UIView *)otherView priority:(UILayoutPriority)priority
+{
+    NSLayoutConstraint *constraint = [NSLayoutConstraint constraintWithFormula:formula LHS:self RHS:otherView];
+    constraint.priority = priority;
+    return constraint;
+}
+
+- (NSLayoutConstraint *)buildConstraint:(NSString *)formula with:(UIView *)otherView
+{
+    // Build constraints a bit more naturally
+
+    return [self buildConstraint:formula with:otherView priority:UILayoutPriorityRequired];
+}
 
 - (NSLayoutConstraint *)constrain:(NSString *)formula to:(UIView *)otherView
 {
@@ -161,7 +188,7 @@
     }
 
     //Now we've got the closest common ancestor, we just make the constraint and add it
-    NSLayoutConstraint* constraint = [NSLayoutConstraint constraintWithFormula:formula LHS:self RHS:otherView];
+    NSLayoutConstraint* constraint = [self buildConstraint:formula with:otherView];
     [commonSuperview addConstraint:constraint];
     return constraint;
 }

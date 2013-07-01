@@ -8,7 +8,7 @@ The formula for constraints is simple: it's just `y = m * x + b`. Of course it c
 
 The format is:
 
-    formula = <attribute> ( "=" | "<" | ">" ) [ <multiplier> "*" ] <attribute> [ "+" <constant> ]
+    formula = <attribute> ( "=" | "<" | ">" ) [ <multiplier> "*" ] <attribute> [ ( "+" | "-" ) <constant> ]
     attribute = "baseline" | "bottom" | "centerX" | "centerY" | "height" | "leading" | "left" | "right" | "top" | "trailing" | "width"
     multiplier = <real-number>
     constant = <real-number>
