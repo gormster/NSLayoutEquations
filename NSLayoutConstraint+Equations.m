@@ -152,8 +152,6 @@
 
 - (NSLayoutConstraint *)constrain:(NSString *)formula to:(UIView *)otherView
 {
-    NSAssert([self isEqual:otherView] == NO, @"can't constrain a view to itself");
-
     UIView* commonSuperview = nil;
 
     if (otherView != nil) {
